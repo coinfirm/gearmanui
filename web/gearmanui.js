@@ -94,7 +94,7 @@ var gearmanui = angular.module('gearmanui', ['ngResource', 'ngRoute'])
         };
 
         // Status table
-        wrapper.status = function(data) {
+        wrapper.status = function(data, heat) {
             var f;
             var counter = 0;
             var statusTable = [];
@@ -106,7 +106,8 @@ var gearmanui = angular.module('gearmanui', ['ngResource', 'ngRoute'])
                         queued: parseInt(element.status[f].in_queue, 10),
                         running: parseInt(element.status[f].jobs_running, 10),
                         workers: parseInt(element.status[f].capable_workers, 10),
-                        server: element.name
+                        server: element.name,
+                        heat: heat[f]
                     };
                 }
             });
@@ -146,9 +147,21 @@ gearmanui.controller('InfoCtrl', function($scope, GearmanSettings, GearmanInfo, 
         GearmanInfo.query(function (data) {
             // Update model with the massaged data.
             $scope.errors = GearmanErrorHandler.get(data);
-            $scope.status = GearmanInfoHandler.status(data);
+            $scope.status = GearmanInfoHandler.status(data, $scope.heat);
             $scope.workers = GearmanInfoHandler.workers(data);
             $scope.servers = GearmanInfoHandler.servers(data);
+            data.forEach(function (element, index, array) {
+                for (f in element.status) {
+                    if(!$scope.heat[f] && $scope.heat[f] !== 0) {
+                        $scope.heat[f] = 0;
+                    }
+                    if ((parseInt(element.status[f].jobs_running) > 0 || parseInt(element.status[f].in_queue) > 0) && $scope.heat[f] < 1) {
+                        $scope.heat[f] += 0.01;                    
+                    } else if($scope.heat[f] > 0) {
+                        $scope.heat[f] -= 0.01;
+                    }
+                }
+            });
         }, function (err) {
             // Handle server errors
             $scope.errors = GearmanErrorHandler.get(
@@ -156,7 +169,7 @@ gearmanui.controller('InfoCtrl', function($scope, GearmanSettings, GearmanInfo, 
             );
         });
     }
-
+    $scope.heat = [];
     window.setInterval(setInfo, GearmanSettings.refreshInterval * 1000);
     setInfo();
 });

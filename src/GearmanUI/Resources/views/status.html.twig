@@ -17,8 +17,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="item in status | filter:search | orderBy:predicate:reverse">
-                <td>{{ "{{ item.function }}" }}</td>
+            <tr ng-repeat="item in status | filter:search | orderBy:predicate:reverse" style="">
+                <td> <div class="circle" style='opacity: {{ "{{ heat[item.function] }}" }}; display: inline-block;'></div> {{ "{{ item.function }}" }}</td>
                 <td>{{ "{{ item.server }}" }}</td>
                 <td>{{ "{{ item.queued }}" }}</td>
                 <td>{{ "{{ item.running }}" }}</td>

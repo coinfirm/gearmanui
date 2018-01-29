@@ -43,3 +43,10 @@ html, body {
 .copyright {
     float: right;
 }
+
+.circle {
+	border-radius: 50%;
+	width: 10px;
+    height: 10px;
+    background: red;
+}
